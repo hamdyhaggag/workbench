@@ -51,6 +51,22 @@ class HomeScreen extends ConsumerWidget {
                         ],
                       ),
                       const Spacer(),
+                      IconButton(
+                        onPressed: () {
+                          ref.invalidate(projectsStreamProvider);
+                          ref.invalidate(pinnedItemsProvider);
+                          ref.invalidate(recentItemsProvider);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('تم تحديث البيانات'),
+                              duration: Duration(seconds: 1),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.refresh_rounded, color: AppColors.textSecondary),
+                        tooltip: 'تحديث',
+                      ),
+                      const SizedBox(width: 8),
                       CircleAvatar(
                         radius: 24,
                         backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,

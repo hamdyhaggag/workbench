@@ -51,6 +51,21 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> {
                             icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textSecondary),
                           ),
                           const Spacer(),
+                          IconButton(
+                            onPressed: () {
+                              ref.invalidate(projectDetailProvider(widget.projectId));
+                              ref.invalidate(projectItemsProvider(widget.projectId));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('تم تحديث البيانات'),
+                                  duration: Duration(seconds: 1),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.refresh_rounded, color: AppColors.textSecondary),
+                            tooltip: 'تحديث',
+                          ),
+                          const SizedBox(width: 8),
                           ElevatedButton.icon(
                             onPressed: () => context.go('/add', extra: {
                               'type': ItemType.note,

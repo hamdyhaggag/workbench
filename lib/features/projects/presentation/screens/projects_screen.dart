@@ -24,6 +24,20 @@ class ProjectsScreen extends ConsumerWidget {
                 children: [
                   Text('المشاريع', style: AppTextStyles.displayLarge),
                   const Spacer(),
+                  IconButton(
+                    onPressed: () {
+                      ref.invalidate(projectsStreamProvider);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('تم تحديث المشاريع'),
+                          duration: Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.refresh_rounded, color: AppColors.textSecondary),
+                    tooltip: 'تحديث',
+                  ),
+                  const SizedBox(width: 8),
                   ElevatedButton.icon(
                     onPressed: () => _showCreateDialog(context, ref),
                     icon: const Icon(Icons.add_rounded, size: 18),
