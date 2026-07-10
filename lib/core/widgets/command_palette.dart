@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../constants/app_colors.dart';
@@ -17,12 +18,14 @@ class CommandPalette extends ConsumerStatefulWidget {
 
 class _CommandPaletteState extends ConsumerState<CommandPalette> {
   final _controller = TextEditingController();
-  final _focusNode = FocusNode();
+  late final FocusNode _focusNode;
   String _query = '';
+  int _selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    _focusNode = FocusNode(onKeyEvent: _handleKeyEvent);
     _focusNode.requestFocus();
   }
 
@@ -31,6 +34,40 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
     _controller.dispose();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (event is KeyDownEvent) {
+      final key = event.logicalKey;
+      if (key == LogicalKeyboardKey.arrowDown) {
+        _moveSelection(1);
+        return KeyEventResult.handled;
+      } else if (key == LogicalKeyboardKey.arrowUp) {
+        _moveSelection(-1);
+        return KeyEventResult.handled;
+      } else if (key == LogicalKeyboardKey.enter) {
+        _selectCurrentItem();
+        return KeyEventResult.handled;
+      }
+    }
+    return KeyEventResult.ignored;
+  }
+
+  void _moveSelection(int direction) {
+    final items = ref.read(searchResultsProvider(_query)).value ?? [];
+    if (items.isEmpty) return;
+    setState(() {
+      _selectedIndex = (_selectedIndex + direction).clamp(0, items.length - 1);
+    });
+  }
+
+  void _selectCurrentItem() {
+    final items = ref.read(searchResultsProvider(_query)).value ?? [];
+    if (items.isEmpty) return;
+    final index = _selectedIndex.clamp(0, items.length - 1);
+    final selectedItem = items[index];
+    widget.onClose();
+    context.go('/items/${selectedItem.id}');
   }
 
   @override
@@ -78,7 +115,10 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                                   icon: const Icon(Icons.close_rounded, size: 18),
                                   onPressed: () {
                                     _controller.clear();
-                                    setState(() => _query = '');
+                                    setState(() {
+                                      _query = '';
+                                      _selectedIndex = 0;
+                                    });
                                   },
                                 )
                               : null,
@@ -97,7 +137,10 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                           filled: true,
                           fillColor: AppColors.background,
                         ),
-                        onChanged: (v) => setState(() => _query = v),
+                        onChanged: (v) => setState(() {
+                          _query = v;
+                          _selectedIndex = 0;
+                        }),
                       ),
                     ),
                     const Divider(height: 1, color: AppColors.border),
@@ -155,6 +198,10 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
   }
 
   Widget _buildResults(List<ItemEntity> items) {
+    if (_selectedIndex >= items.length) {
+      _selectedIndex = items.isEmpty ? 0 : items.length - 1;
+    }
+
     return Flexible(
       child: ListView.separated(
         shrinkWrap: true,
@@ -163,26 +210,42 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
         separatorBuilder: (_, __) => const Divider(height: 1, color: AppColors.border, indent: 16, endIndent: 16),
         itemBuilder: (_, i) {
           final item = items[i];
-          return ListTile(
-            leading: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: ItemUtils.getTypeColor(item.type).withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
+          final isSelected = i == _selectedIndex;
+
+          return Container(
+            color: isSelected ? AppColors.primary.withValues(alpha: 0.12) : null,
+            child: ListTile(
+              leading: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: ItemUtils.getTypeColor(item.type).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                  border: isSelected ? Border.all(color: AppColors.primary, width: 1.5) : null,
+                ),
+                child: Icon(ItemUtils.getTypeIcon(item.type), color: ItemUtils.getTypeColor(item.type), size: 18),
               ),
-              child: Icon(ItemUtils.getTypeIcon(item.type), color: ItemUtils.getTypeColor(item.type), size: 18),
+              title: Text(
+                item.title,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  color: isSelected ? AppColors.primary : AppColors.text,
+                ),
+              ),
+              subtitle: Text(
+                ItemUtils.getTypeLabel(item.type),
+                style: AppTextStyles.caption.copyWith(
+                  color: isSelected ? AppColors.primary.withValues(alpha: 0.7) : AppColors.textSecondary,
+                ),
+              ),
+              trailing: isSelected
+                  ? const Icon(Icons.keyboard_return_rounded, size: 14, color: AppColors.primary)
+                  : const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.textSecondary),
+              onTap: () {
+                widget.onClose();
+                context.go('/items/${item.id}');
+              },
             ),
-            title: Text(item.title, style: AppTextStyles.bodyMedium),
-            subtitle: Text(
-              ItemUtils.getTypeLabel(item.type),
-              style: AppTextStyles.caption,
-            ),
-            trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.textSecondary),
-            onTap: () {
-              widget.onClose();
-              context.go('/items/${item.id}');
-            },
           );
         },
       ),

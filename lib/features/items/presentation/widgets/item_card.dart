@@ -9,88 +9,177 @@ import 'package:workbench/features/items/domain/entities/item_entity.dart';
 import 'package:workbench/features/items/presentation/providers/item_providers.dart';
 import 'package:workbench/features/items/presentation/widgets/item_type_badge.dart';
 
-class ItemCard extends ConsumerWidget {
+class ItemCard extends ConsumerStatefulWidget {
   final ItemEntity item;
   final bool compact;
 
   const ItemCard({super.key, required this.item, this.compact = false});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final notifier = ref.read(itemNotifierProvider.notifier);
+  ConsumerState<ItemCard> createState() => _ItemCardState();
+}
 
-    return GestureDetector(
-      onTap: () {
-        notifier.touchItem(item.id);
-        context.go('/items/${item.id}');
-      },
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: AppColors.card,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.border),
+class _ItemCardState extends ConsumerState<ItemCard> {
+  bool _isHovered = false;
+  bool _obscurePassword = true;
+
+  String _getCopyLabel() {
+    switch (widget.item.type) {
+      case ItemType.prompt: return 'نسخ البرومبت';
+      case ItemType.link: return 'نسخ اللينك';
+      case ItemType.account: return 'نسخ الباسورد';
+      case ItemType.snippet: return 'نسخ الكود';
+      case ItemType.api: return 'نسخ الـ Endpoint';
+      default: return 'نسخ';
+    }
+  }
+
+  void _copyItem(BuildContext context) {
+    String? text;
+    switch (widget.item.type) {
+      case ItemType.note: text = widget.item.content; break;
+      case ItemType.prompt: text = widget.item.promptContent; break;
+      case ItemType.link: text = widget.item.url; break;
+      case ItemType.account: text = widget.item.encryptedPassword; break;
+      case ItemType.snippet: text = widget.item.code; break;
+      case ItemType.api: text = widget.item.endpoint; break;
+    }
+    if (text != null) {
+      Clipboard.setData(ClipboardData(text: text));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 18),
+              const SizedBox(width: 8),
+              Text('اتنسخت', style: AppTextStyles.bodyMedium),
+            ],
+          ),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.card,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: const BorderSide(color: AppColors.border),
+          ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header row
-            Row(
-              children: [
-                ItemTypeBadge(type: item.type, compact: true),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    item.title,
-                    style: AppTextStyles.labelLarge,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (item.isPinned)
-                  const Padding(
-                    padding: EdgeInsets.only(left: 4),
-                    child: Icon(Icons.push_pin_rounded, size: 14, color: AppColors.primary),
-                  ),
-                if (item.isFavorite)
-                  const Padding(
-                    padding: EdgeInsets.only(left: 4),
-                    child: Icon(Icons.star_rounded, size: 14, color: Color(0xFFFFD700)),
-                  ),
-                _ItemMoreMenu(item: item, notifier: notifier),
-              ],
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final notifier = ref.read(itemNotifierProvider.notifier);
+    final item = widget.item;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: () {
+          notifier.touchItem(item.id);
+          context.go('/items/${item.id}');
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          transform: Matrix4.translationValues(0.0, _isHovered ? -3.0 : 0.0, 0.0),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: AppColors.card,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: _isHovered ? AppColors.primary : AppColors.border,
+              width: _isHovered ? 1.2 : 1.0,
             ),
-            // Preview
-            if (!compact) _buildPreview(),
-            // Footer
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                ItemTypeBadge(type: item.type),
-                const Spacer(),
-                if (item.tags.isNotEmpty) ...[
-                  for (var tag in item.tags.take(2))
-                    Container(
-                      margin: const EdgeInsets.only(right: 4),
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Text('#$tag', style: AppTextStyles.caption),
+            boxShadow: _isHovered
+                ? [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.15),
+                      blurRadius: 16,
+                      offset: const Offset(0, 8),
                     ),
-                  if (item.tags.length > 2)
-                    Text('+${item.tags.length - 2}', style: AppTextStyles.caption),
+                  ]
+                : null,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header row
+              Row(
+                children: [
+                  ItemTypeBadge(type: item.type, compact: true),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      item.title,
+                      style: AppTextStyles.labelLarge,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (item.isPinned)
+                    const Padding(
+                      padding: EdgeInsets.only(left: 4),
+                      child: Icon(Icons.push_pin_rounded, size: 14, color: AppColors.primary),
+                    ),
+                  if (item.isFavorite)
+                    const Padding(
+                      padding: EdgeInsets.only(left: 4),
+                      child: Icon(Icons.star_rounded, size: 14, color: Color(0xFFFFD700)),
+                    ),
+                  // Direct Copy Action Button
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 150),
+                    opacity: _isHovered ? 1.0 : 0.4,
+                    child: Tooltip(
+                      message: _getCopyLabel(),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(6),
+                        onTap: () => _copyItem(context),
+                        child: const Padding(
+                          padding: EdgeInsets.all(6),
+                          child: Icon(Icons.copy_rounded, size: 16, color: AppColors.textSecondary),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  _ItemMoreMenu(item: item, notifier: notifier),
                 ],
-                const SizedBox(width: 8),
-                Text(
-                  ItemUtils.formatDate(item.updatedAt),
-                  style: AppTextStyles.caption,
-                ),
-              ],
-            ),
-          ],
+              ),
+              // Preview
+              if (!widget.compact) _buildPreview(),
+              // Footer
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  ItemTypeBadge(type: item.type),
+                  const Spacer(),
+                  if (item.tags.isNotEmpty) ...[
+                    for (var tag in item.tags.take(2))
+                      Container(
+                        margin: const EdgeInsets.only(right: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.background,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: Text('#$tag', style: AppTextStyles.caption),
+                      ),
+                    if (item.tags.length > 2)
+                      Text('+${item.tags.length - 2}', style: AppTextStyles.caption),
+                  ],
+                  const SizedBox(width: 8),
+                  Text(
+                    ItemUtils.formatDate(item.updatedAt),
+                    style: AppTextStyles.caption,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -98,32 +187,82 @@ class ItemCard extends ConsumerWidget {
 
   Widget _buildPreview() {
     String preview = '';
-    switch (item.type) {
+    switch (widget.item.type) {
       case ItemType.note:
-        preview = item.content ?? '';
+        preview = widget.item.content ?? '';
         break;
       case ItemType.prompt:
-        preview = item.promptContent ?? '';
+        preview = widget.item.promptContent ?? '';
         break;
       case ItemType.link:
-        preview = item.url ?? '';
+        preview = widget.item.url ?? '';
         break;
       case ItemType.account:
-        preview = item.email ?? item.username ?? '';
+        preview = widget.item.email ?? widget.item.username ?? '';
         break;
       case ItemType.snippet:
-        preview = item.code ?? '';
+        preview = widget.item.code ?? '';
         break;
       case ItemType.api:
-        preview = '${item.method ?? 'GET'} ${item.endpoint ?? ''}';
+        preview = '${widget.item.method ?? 'GET'} ${widget.item.endpoint ?? ''}';
         break;
     }
+    
+    // Explicit password hide/show for accounts
+    if (widget.item.type == ItemType.account) {
+      final email = widget.item.email ?? widget.item.username ?? '';
+      final password = widget.item.encryptedPassword ?? '';
+      return Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (email.isNotEmpty)
+              Text(
+                'الاسم: $email',
+                style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _obscurePassword ? '••••••••' : password,
+                    style: _obscurePassword
+                        ? AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary, letterSpacing: 2.0)
+                        : AppTextStyles.mono.copyWith(color: AppColors.primary, fontSize: 11),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                InkWell(
+                  borderRadius: BorderRadius.circular(4),
+                  onTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: Icon(
+                      _obscurePassword ? Icons.visibility_rounded : Icons.visibility_off_rounded,
+                      size: 14,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
     if (preview.isEmpty) return const SizedBox(height: 4);
     return Padding(
       padding: const EdgeInsets.only(top: 6),
       child: Text(
-        item.type == ItemType.account ? '••••••••' : preview,
-        style: item.type == ItemType.snippet
+        preview,
+        style: widget.item.type == ItemType.snippet
             ? AppTextStyles.mono.copyWith(color: AppColors.textSecondary, fontSize: 11)
             : AppTextStyles.bodySmall,
         maxLines: 2,

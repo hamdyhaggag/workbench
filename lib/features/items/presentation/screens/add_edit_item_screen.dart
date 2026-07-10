@@ -195,13 +195,6 @@ class _AddEditItemScreenState extends ConsumerState<AddEditItemScreen> {
                                 onPressed: () => context.pop(),
                                 icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textSecondary),
                               ),
-                              const Spacer(),
-                              ElevatedButton(
-                                onPressed: _isLoading ? null : _save,
-                                child: _isLoading
-                                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.background))
-                                    : const Text('حفظ'),
-                              ),
                             ],
                           ),
                           const SizedBox(height: 20),
@@ -304,7 +297,45 @@ class _AddEditItemScreenState extends ConsumerState<AddEditItemScreen> {
                     ),
                   ),
 
-                  const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                  // Save Button under fields
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _save,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: AppColors.background,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.background,
+                                  ),
+                                )
+                              : Text(
+                                  isEdit ? 'حفظ التعديلات' : 'حفظ العنصر',
+                                  style: AppTextStyles.labelLarge.copyWith(
+                                    color: AppColors.background,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SliverToBoxAdapter(child: SizedBox(height: 80)),
                 ],
               ),
             ),
