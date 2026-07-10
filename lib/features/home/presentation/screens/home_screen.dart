@@ -26,6 +26,9 @@ class HomeScreen extends ConsumerWidget {
     final pinnedAsync = ref.watch(pinnedItemsProvider);
     final recentAsync = ref.watch(recentItemsProvider);
 
+    final width = MediaQuery.sizeOf(context).width;
+    final isMobile = width < 640;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
@@ -37,6 +40,16 @@ class HomeScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (isMobile) ...[
+                    Center(
+                      child: Image.asset(
+                        'assets/images/logo.jpg',
+                        height: 52,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
                   Row(
                     children: [
                       Column(

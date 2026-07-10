@@ -125,16 +125,17 @@ class _DesktopLayout extends ConsumerWidget {
           width: 220,
           decoration: const BoxDecoration(
             color: AppColors.card,
-            border: Border(right: BorderSide(color: AppColors.border)),
+            border: BorderDirectional(end: BorderSide(color: AppColors.border)),
           ),
           child: Column(
             children: [
-              const SizedBox(height: 24),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                color: const Color(0xFF090A0C), // Exact match of logo background
                 child: Image.asset(
                   'assets/images/logo.jpg',
-                  height: 80,
+                  height: 100,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -234,7 +235,7 @@ class _TabletLayout extends ConsumerWidget {
           width: 64,
           decoration: const BoxDecoration(
             color: AppColors.card,
-            border: Border(right: BorderSide(color: AppColors.border)),
+            border: BorderDirectional(end: BorderSide(color: AppColors.border)),
           ),
           child: Column(
             children: [
