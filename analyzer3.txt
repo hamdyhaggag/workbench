@@ -1,0 +1,19 @@
+Analyzing workbench...                                          
+
+   info - Don't invoke 'print' in production code - fix_imports.dart:25:9 - avoid_print
+   info - Don't invoke 'print' in production code - fix_imports_2.dart:19:9 - avoid_print
+warning - Unused import: '../../features/items/presentation/widgets/item_type_badge.dart' - lib\core\widgets\command_palette.dart:8:8 - unused_import
+warning - Unused import: '../../features/items/domain/entities/item_entity.dart' - lib\core\widgets\shell_scaffold.dart:7:8 - unused_import
+warning - Unused import: 'package:workbench/core/utils/item_utils.dart' - lib\features\home\presentation\screens\home_screen.dart:7:8 - unused_import
+warning - Unused import: 'package:workbench/features/items/domain/entities/item_entity.dart' - lib\features\home\presentation\screens\home_screen.dart:10:8 - unused_import
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\features\items\presentation\screens\add_edit_item_screen.dart:260:31 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\features\items\presentation\screens\add_edit_item_screen.dart:373:15 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\features\items\presentation\screens\add_edit_item_screen.dart:403:21 - deprecated_member_use
+warning - Unused import: 'package:workbench/core/constants/app_colors.dart' - lib\features\items\presentation\widgets\item_type_badge.dart:2:8 - unused_import
+warning - Unused import: 'package:workbench/features/items/presentation/widgets/item_type_badge.dart' - lib\features\projects\presentation\screens\project_detail_screen.dart:11:8 - unused_import
+warning - Unused import: 'package:workbench/features/items/presentation/providers/item_providers.dart' - lib\features\projects\presentation\screens\projects_screen.dart:8:8 - unused_import
+  error - Target of URI doesn't exist: '../../domain/entities/item_entity.dart' - lib\features\search\presentation\providers\search_providers.dart:2:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../../data/repositories/item_repository_impl.dart' - lib\features\search\presentation\providers\search_providers.dart:3:8 - uri_does_not_exist
+  error - The name 'ItemEntity' isn't a type, so it can't be used as a type argument - lib\features\search\presentation\providers\search_providers.dart:9:58 - non_type_as_type_argument
+  error - The function 'ItemRepositoryImpl' isn't defined - lib\features\search\presentation\providers\search_providers.dart:11:16 - undefined_function
+
