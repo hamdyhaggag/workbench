@@ -243,11 +243,10 @@ class _TabletLayout extends ConsumerWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.asset(
-                  'assets/images/logo.jpg',
+                  'assets/images/icon_mark.jpg',
                   width: 36,
                   height: 36,
-                  alignment: Alignment.topCenter,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
                 ),
               ),
               const SizedBox(height: 24),
