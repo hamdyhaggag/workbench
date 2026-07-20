@@ -15,7 +15,7 @@ class HomeScreen extends ConsumerWidget {
   String _greeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) return 'صباح الخير';
-    if (hour < 17) return 'مساء الخير';
+    if (hour < 16) return 'مساء الخير';
     return 'مساء النور';
   }
 
@@ -59,7 +59,9 @@ class HomeScreen extends ConsumerWidget {
                           if (user?.displayName != null)
                             Text(
                               user!.displayName!.split(' ').first,
-                              style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textSecondary),
+                              style: AppTextStyles.bodyLarge.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                         ],
                       ),
@@ -76,16 +78,24 @@ class HomeScreen extends ConsumerWidget {
                             ),
                           );
                         },
-                        icon: const Icon(Icons.refresh_rounded, color: AppColors.textSecondary),
+                        icon: const Icon(
+                          Icons.refresh_rounded,
+                          color: AppColors.textSecondary,
+                        ),
                         tooltip: 'تحديث',
                       ),
                       const SizedBox(width: 8),
                       CircleAvatar(
                         radius: 24,
-                        backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
+                        backgroundImage: user?.photoURL != null
+                            ? NetworkImage(user!.photoURL!)
+                            : null,
                         backgroundColor: AppColors.card,
                         child: user?.photoURL == null
-                            ? const Icon(Icons.person_rounded, color: AppColors.textSecondary)
+                            ? const Icon(
+                                Icons.person_rounded,
+                                color: AppColors.textSecondary,
+                              )
                             : null,
                       ),
                     ],
@@ -95,7 +105,10 @@ class HomeScreen extends ConsumerWidget {
                   GestureDetector(
                     onTap: () => context.go('/search'),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.card,
                         borderRadius: BorderRadius.circular(12),
@@ -103,12 +116,24 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.search_rounded, color: AppColors.textSecondary, size: 20),
+                          const Icon(
+                            Icons.search_rounded,
+                            color: AppColors.textSecondary,
+                            size: 20,
+                          ),
                           const SizedBox(width: 10),
-                          Text('دور على أي حاجة...', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary)),
+                          Text(
+                            'دور على أي حاجة...',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
                           const Spacer(),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.background,
                               borderRadius: BorderRadius.circular(4),
@@ -141,7 +166,8 @@ class HomeScreen extends ConsumerWidget {
           // Pinned Items
           pinnedAsync.when(
             loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
-            error: (_, __) => const SliverToBoxAdapter(child: SizedBox.shrink()),
+            error: (_, __) =>
+                const SliverToBoxAdapter(child: SizedBox.shrink()),
             data: (pinned) => pinned.isEmpty
                 ? const SliverToBoxAdapter(child: SizedBox.shrink())
                 : SliverToBoxAdapter(
@@ -154,8 +180,12 @@ class HomeScreen extends ConsumerWidget {
                           scrollDirection: Axis.horizontal,
                           padding: const EdgeInsets.symmetric(horizontal: 24),
                           itemCount: pinned.length,
-                          separatorBuilder: (_, __) => const SizedBox(width: 12),
-                          itemBuilder: (_, i) => SizedBox(width: 260, child: ItemCard(item: pinned[i], compact: true)),
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 12),
+                          itemBuilder: (_, i) => SizedBox(
+                            width: 260,
+                            child: ItemCard(item: pinned[i], compact: true),
+                          ),
                         ),
                       ),
                     ),
@@ -165,7 +195,8 @@ class HomeScreen extends ConsumerWidget {
           // Recent Items
           recentAsync.when(
             loading: () => const SliverToBoxAdapter(child: _LoadingState()),
-            error: (_, __) => const SliverToBoxAdapter(child: SizedBox.shrink()),
+            error: (_, __) =>
+                const SliverToBoxAdapter(child: SizedBox.shrink()),
             data: (items) => items.isEmpty
                 ? const SliverToBoxAdapter(child: SizedBox.shrink())
                 : SliverToBoxAdapter(
@@ -187,7 +218,8 @@ class HomeScreen extends ConsumerWidget {
           // Recent Projects
           projectsAsync.when(
             loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
-            error: (_, __) => const SliverToBoxAdapter(child: SizedBox.shrink()),
+            error: (_, __) =>
+                const SliverToBoxAdapter(child: SizedBox.shrink()),
             data: (projects) => projects.isEmpty
                 ? const SliverToBoxAdapter(child: _EmptyHomeState())
                 : SliverToBoxAdapter(
@@ -196,20 +228,27 @@ class HomeScreen extends ConsumerWidget {
                       icon: Icons.folder_rounded,
                       trailing: TextButton(
                         onPressed: () => context.go('/projects'),
-                        child: Text('كل المشاريع', style: AppTextStyles.bodySmall.copyWith(color: AppColors.primary)),
+                        child: Text(
+                          'كل المشاريع',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.primary,
+                          ),
+                        ),
                       ),
                       child: GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         padding: const EdgeInsets.symmetric(horizontal: 24),
-                        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 200,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 1.4,
-                        ),
+                        gridDelegate:
+                            const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 200,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                              childAspectRatio: 1.4,
+                            ),
                         itemCount: projects.take(6).length,
-                        itemBuilder: (_, i) => _ProjectMiniCard(project: projects[i]),
+                        itemBuilder: (_, i) =>
+                            _ProjectMiniCard(project: projects[i]),
                       ),
                     ),
                   ),
@@ -233,11 +272,29 @@ class _StatsRow extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
       child: Row(
         children: [
-          _StatCard(label: 'مشاريع', value: projects.length.toString(), icon: Icons.folder_rounded, color: AppColors.primary),
+          _StatCard(
+            label: 'مشاريع',
+            value: projects.length.toString(),
+            icon: Icons.folder_rounded,
+            color: AppColors.primary,
+          ),
           const SizedBox(width: 10),
-          _StatCard(label: 'عناصر', value: items.length.toString(), icon: Icons.layers_rounded, color: AppColors.linkColor),
+          _StatCard(
+            label: 'عناصر',
+            value: items.length.toString(),
+            icon: Icons.layers_rounded,
+            color: AppColors.linkColor,
+          ),
           const SizedBox(width: 10),
-          _StatCard(label: 'مثبتات', value: items.where((i) => (i as dynamic).isPinned == true).length.toString(), icon: Icons.push_pin_rounded, color: AppColors.success),
+          _StatCard(
+            label: 'مثبتات',
+            value: items
+                .where((i) => (i as dynamic).isPinned == true)
+                .length
+                .toString(),
+            icon: Icons.push_pin_rounded,
+            color: AppColors.success,
+          ),
         ],
       ),
     );
@@ -250,7 +307,12 @@ class _StatCard extends StatelessWidget {
   final IconData icon;
   final Color color;
 
-  const _StatCard({required this.label, required this.value, required this.icon, required this.color});
+  const _StatCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -267,7 +329,10 @@ class _StatCard extends StatelessWidget {
           children: [
             Icon(icon, color: color, size: 18),
             const SizedBox(height: 8),
-            Text(value, style: AppTextStyles.headlineLarge.copyWith(color: color)),
+            Text(
+              value,
+              style: AppTextStyles.headlineLarge.copyWith(color: color),
+            ),
             Text(label, style: AppTextStyles.caption),
           ],
         ),
@@ -282,7 +347,12 @@ class _Section extends StatelessWidget {
   final Widget child;
   final Widget? trailing;
 
-  const _Section({required this.title, required this.icon, required this.child, this.trailing});
+  const _Section({
+    required this.title,
+    required this.icon,
+    required this.child,
+    this.trailing,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -327,7 +397,12 @@ class _ProjectMiniCard extends StatelessWidget {
           children: [
             Text(project.emoji, style: const TextStyle(fontSize: 24)),
             const Spacer(),
-            Text(project.name, style: AppTextStyles.labelLarge, maxLines: 1, overflow: TextOverflow.ellipsis),
+            Text(
+              project.name,
+              style: AppTextStyles.labelLarge,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
             const SizedBox(height: 4),
             Text('${project.itemCount} عنصر', style: AppTextStyles.caption),
           ],
@@ -351,7 +426,12 @@ class _EmptyHomeState extends StatelessWidget {
             const SizedBox(height: 16),
             Text('ابدأ مشروعك الأول', style: AppTextStyles.headlineMedium),
             const SizedBox(height: 8),
-            Text('اضغط + لإضافة مشروع أو عنصر', style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary)),
+            Text(
+              'اضغط + لإضافة مشروع أو عنصر',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
           ],
         ),
       ),
@@ -367,7 +447,10 @@ class _LoadingState extends StatelessWidget {
     return const Center(
       child: Padding(
         padding: EdgeInsets.all(40),
-        child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
+        child: CircularProgressIndicator(
+          color: AppColors.primary,
+          strokeWidth: 2,
+        ),
       ),
     );
   }
