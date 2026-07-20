@@ -222,7 +222,7 @@ class _SearchResultCard extends StatelessWidget {
     final subtitle = _getSubtitle();
 
     return GestureDetector(
-      onTap: () => context.go('/items/${item.id}'),
+      onTap: () => context.push('/items/${item.id}'),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.all(14),

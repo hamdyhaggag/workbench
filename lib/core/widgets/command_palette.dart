@@ -67,7 +67,7 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
     final index = _selectedIndex.clamp(0, items.length - 1);
     final selectedItem = items[index];
     widget.onClose();
-    context.go('/items/${selectedItem.id}');
+    context.push('/items/${selectedItem.id}');
   }
 
   @override
@@ -243,7 +243,7 @@ class _CommandPaletteState extends ConsumerState<CommandPalette> {
                   : const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.textSecondary),
               onTap: () {
                 widget.onClose();
-                context.go('/items/${item.id}');
+                context.push('/items/${item.id}');
               },
             ),
           );

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'item_block.dart';
 
 enum ItemType { note, prompt, link, account, snippet, api }
 
@@ -13,6 +14,7 @@ class ItemEntity extends Equatable {
   final bool isFavorite;
   final bool isPinned;
   final List<String> tags;
+  final List<ItemBlock> blocks;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? lastAccessedAt;
@@ -54,6 +56,7 @@ class ItemEntity extends Equatable {
     this.isFavorite = false,
     this.isPinned = false,
     this.tags = const [],
+    this.blocks = const [],
     required this.createdAt,
     required this.updatedAt,
     this.lastAccessedAt,
@@ -83,6 +86,7 @@ class ItemEntity extends Equatable {
     bool? isFavorite,
     bool? isPinned,
     List<String>? tags,
+    List<ItemBlock>? blocks,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? lastAccessedAt,
@@ -111,6 +115,7 @@ class ItemEntity extends Equatable {
       isFavorite: isFavorite ?? this.isFavorite,
       isPinned: isPinned ?? this.isPinned,
       tags: tags ?? this.tags,
+      blocks: blocks ?? this.blocks,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       lastAccessedAt: lastAccessedAt ?? this.lastAccessedAt,
@@ -144,9 +149,17 @@ class ItemEntity extends Equatable {
     if (endpoint != null) parts.add(endpoint!);
     if (apiNotes != null) parts.add(apiNotes!);
     parts.addAll(tags);
+    for (final block in blocks) {
+      if (block.title != null) parts.add(block.title!);
+      if (block.content != null) parts.add(block.content!);
+      if (block.promptContent != null) parts.add(block.promptContent!);
+      if (block.url != null) parts.add(block.url!);
+      if (block.code != null) parts.add(block.code!);
+      if (block.apiNotes != null) parts.add(block.apiNotes!);
+    }
     return parts.join(' ').toLowerCase();
   }
 
   @override
-  List<Object?> get props => [id, projectId, title, type, status, isFavorite, isPinned, tags, createdAt, updatedAt];
+  List<Object?> get props => [id, projectId, title, type, status, isFavorite, isPinned, tags, blocks, createdAt, updatedAt];
 }

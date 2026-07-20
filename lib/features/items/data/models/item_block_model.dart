@@ -1,21 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../domain/entities/item_block.dart';
 import '../../domain/entities/item_entity.dart';
-import 'item_block_model.dart';
 
-class ItemModel extends ItemEntity {
-  const ItemModel({
+class ItemBlockModel extends ItemBlock {
+  const ItemBlockModel({
     required super.id,
-    required super.projectId,
-    required super.title,
+    super.parentId,
+    super.title,
     required super.type,
-    super.status,
-    super.isFavorite,
-    super.isPinned,
-    super.tags,
-    super.blocks,
-    required super.createdAt,
-    required super.updatedAt,
-    super.lastAccessedAt,
     super.content,
     super.promptContent,
     super.url,
@@ -33,30 +24,15 @@ class ItemModel extends ItemEntity {
     super.apiNotes,
   });
 
-  factory ItemModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return ItemModel(
-      id: doc.id,
-      projectId: data['projectId'] ?? '',
-      title: data['title'] ?? '',
+  factory ItemBlockModel.fromMap(Map<String, dynamic> data) {
+    return ItemBlockModel(
+      id: data['id'] ?? '',
+      parentId: data['parentId'],
+      title: data['title'],
       type: ItemType.values.firstWhere(
         (e) => e.name == data['type'],
         orElse: () => ItemType.note,
       ),
-      status: ItemStatus.values.firstWhere(
-        (e) => e.name == data['status'],
-        orElse: () => ItemStatus.active,
-      ),
-      isFavorite: data['isFavorite'] ?? false,
-      isPinned: data['isPinned'] ?? false,
-      tags: List<String>.from(data['tags'] ?? []),
-      blocks: (data['blocks'] as List<dynamic>?)
-              ?.map((e) => ItemBlockModel.fromMap(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      lastAccessedAt: (data['lastAccessedAt'] as Timestamp?)?.toDate(),
       content: data['content'],
       promptContent: data['promptContent'],
       url: data['url'],
@@ -75,20 +51,12 @@ class ItemModel extends ItemEntity {
     );
   }
 
-  factory ItemModel.fromEntity(ItemEntity entity) {
-    return ItemModel(
+  factory ItemBlockModel.fromEntity(ItemBlock entity) {
+    return ItemBlockModel(
       id: entity.id,
-      projectId: entity.projectId,
+      parentId: entity.parentId,
       title: entity.title,
       type: entity.type,
-      status: entity.status,
-      isFavorite: entity.isFavorite,
-      isPinned: entity.isPinned,
-      tags: entity.tags,
-      blocks: entity.blocks,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
-      lastAccessedAt: entity.lastAccessedAt,
       content: entity.content,
       promptContent: entity.promptContent,
       url: entity.url,
@@ -107,19 +75,12 @@ class ItemModel extends ItemEntity {
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toMap() {
     return {
-      'projectId': projectId,
+      'id': id,
+      'parentId': parentId,
       'title': title,
       'type': type.name,
-      'status': status.name,
-      'isFavorite': isFavorite,
-      'isPinned': isPinned,
-      'tags': tags,
-      'blocks': blocks.map((b) => ItemBlockModel.fromEntity(b).toMap()).toList(),
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': Timestamp.fromDate(updatedAt),
-      'lastAccessedAt': lastAccessedAt != null ? Timestamp.fromDate(lastAccessedAt!) : null,
       'content': content,
       'promptContent': promptContent,
       'url': url,
@@ -135,8 +96,6 @@ class ItemModel extends ItemEntity {
       'headersJson': headersJson,
       'bodyJson': bodyJson,
       'apiNotes': apiNotes,
-      // Search index fields
-      'searchTitle': title.toLowerCase(),
     };
   }
 }

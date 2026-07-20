@@ -78,7 +78,7 @@ class _ItemCardState extends ConsumerState<ItemCard> {
       child: GestureDetector(
         onTap: () {
           notifier.touchItem(item.id);
-          context.go('/items/${item.id}');
+          context.push('/items/${item.id}');
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -299,7 +299,7 @@ class _ItemMoreMenu extends ConsumerWidget {
             await notifier.toggleFavorite(item.id, !item.isFavorite);
             break;
           case 'edit':
-            context.go('/items/${item.id}/edit');
+            context.push('/items/${item.id}/edit');
             break;
           case 'archive':
             await notifier.archiveItem(item.id);

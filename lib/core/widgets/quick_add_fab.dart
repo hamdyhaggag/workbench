@@ -39,7 +39,7 @@ class _QuickAddFabState extends State<QuickAddFab> with SingleTickerProviderStat
 
   void _navigate(ItemType type) {
     _toggle();
-    context.go('/add', extra: {
+    context.push('/add', extra: {
       'type': type,
       'projectId': widget.defaultProjectId,
     });

@@ -7,6 +7,7 @@ import 'package:workbench/core/constants/app_colors.dart';
 import 'package:workbench/core/constants/app_text_styles.dart';
 import 'package:workbench/core/utils/item_utils.dart';
 import 'package:workbench/features/items/domain/entities/item_entity.dart';
+import 'package:workbench/features/items/domain/entities/item_block.dart';
 import 'package:workbench/features/items/presentation/providers/item_providers.dart';
 import 'package:workbench/features/items/presentation/widgets/item_type_badge.dart';
 
@@ -19,8 +20,8 @@ class ItemDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
-  bool _showPassword = false;
   ItemEntity? _item;
+  final Map<String, bool> _showPasswords = {};
 
   @override
   void initState() {
@@ -60,6 +61,27 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
     }
   }
 
+  ItemBlock _legacyToBlock(ItemEntity item) {
+    return ItemBlock(
+      id: item.id,
+      type: item.type,
+      content: item.content,
+      promptContent: item.promptContent,
+      url: item.url,
+      website: item.website,
+      email: item.email,
+      username: item.username,
+      encryptedPassword: item.encryptedPassword,
+      code: item.code,
+      codeLanguage: item.codeLanguage,
+      endpoint: item.endpoint,
+      method: item.method,
+      headersJson: item.headersJson,
+      bodyJson: item.bodyJson,
+      apiNotes: item.apiNotes,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_item == null) {
@@ -70,7 +92,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
     }
 
     final item = _item!;
-    final typeColor = ItemUtils.getTypeColor(item.type);
+    final blocks = item.blocks.isEmpty ? [_legacyToBlock(item)] : item.blocks;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -86,7 +108,13 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                   Row(
                     children: [
                       IconButton(
-                        onPressed: () => context.pop(),
+                        onPressed: () {
+                          if (context.canPop()) {
+                            context.pop();
+                          } else {
+                            context.go('/');
+                          }
+                        },
                         icon: const Icon(Icons.arrow_back_rounded, color: AppColors.textSecondary),
                       ),
                       const Spacer(),
@@ -108,7 +136,7 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                       ),
                       IconButton(
                         icon: const Icon(Icons.edit_outlined, color: AppColors.textSecondary),
-                        onPressed: () => context.go('/items/${item.id}/edit'),
+                        onPressed: () => context.push('/items/${item.id}/edit').then((_) => _loadItem()),
                       ),
                       PopupMenuButton<String>(
                         color: AppColors.card,
@@ -137,7 +165,6 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // Title + badge
                   ItemTypeBadge(type: item.type),
                   const SizedBox(height: 10),
                   Text(item.title, style: AppTextStyles.displayMedium),
@@ -164,11 +191,16 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
             ),
           ),
 
-          // Content
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: _buildTypeContent(item, typeColor),
+          // Content Blocks
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  child: _buildBlockWrapper(blocks[index], item.blocks.isNotEmpty),
+                );
+              },
+              childCount: blocks.length,
             ),
           ),
 
@@ -178,51 +210,96 @@ class _ItemDetailScreenState extends ConsumerState<ItemDetailScreen> {
     );
   }
 
-  Widget _buildTypeContent(ItemEntity item, Color typeColor) {
-    switch (item.type) {
+  Widget _buildBlockWrapper(ItemBlock block, bool showHeader) {
+     final isChild = block.parentId != null;
+     final color = ItemUtils.getTypeColor(block.type);
+     
+     Widget content = _buildBlockContent(block);
+     
+     if (showHeader && (block.title != null || isChild)) {
+        return Container(
+          margin: EdgeInsets.only(right: isChild ? 24 : 0),
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withValues(alpha: 0.3)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (block.title != null && block.title!.isNotEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    border: const Border(bottom: BorderSide(color: AppColors.border)),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(11)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(ItemUtils.getTypeIcon(block.type), size: 16, color: color),
+                      const SizedBox(width: 8),
+                      Text(block.title!, style: AppTextStyles.labelLarge.copyWith(color: color)),
+                    ],
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: content,
+              ),
+            ],
+          ),
+        );
+     } else {
+        // Just the content itself
+        return content;
+     }
+  }
+
+  Widget _buildBlockContent(ItemBlock block) {
+    switch (block.type) {
       case ItemType.note:
-        return _NoteContent(item: item, onCopy: _copy);
+        return _NoteContent(block: block, onCopy: _copy);
       case ItemType.prompt:
-        return _PromptContent(item: item, onCopy: _copy);
+        return _PromptContent(block: block, onCopy: _copy);
       case ItemType.link:
-        return _LinkContent(item: item, onCopy: _copy, onOpen: _openUrl);
+        return _LinkContent(block: block, onCopy: _copy, onOpen: _openUrl);
       case ItemType.account:
         return _AccountContent(
-          item: item,
-          showPassword: _showPassword,
-          onTogglePassword: () => setState(() => _showPassword = !_showPassword),
+          block: block,
+          showPassword: _showPasswords[block.id] ?? false,
+          onTogglePassword: () => setState(() => _showPasswords[block.id] = !(_showPasswords[block.id] ?? false)),
           onCopy: _copy,
           onOpen: _openUrl,
         );
       case ItemType.snippet:
-        return _SnippetContent(item: item, onCopy: _copy);
+        return _SnippetContent(block: block, onCopy: _copy);
       case ItemType.api:
-        return _ApiContent(item: item, onCopy: _copy);
+        return _ApiContent(block: block, onCopy: _copy);
     }
   }
 }
 
-// ---- Content Widgets ----
-
 class _NoteContent extends StatelessWidget {
-  final ItemEntity item;
+  final ItemBlock block;
   final Function(String, String) onCopy;
-  const _NoteContent({required this.item, required this.onCopy});
+  const _NoteContent({required this.block, required this.onCopy});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (item.content != null && item.content!.isNotEmpty) ...[
+        if (block.content != null && block.content!.isNotEmpty) ...[
           _ContentCard(
-            child: Text(item.content!, style: AppTextStyles.bodyLarge),
+            child: Text(block.content!, style: AppTextStyles.bodyLarge),
           ),
           const SizedBox(height: 12),
           _ActionButton(
             icon: Icons.copy_rounded,
             label: 'انسخ الملاحظة',
-            onPressed: () => onCopy(item.content!, 'note'),
+            onPressed: () => onCopy(block.content!, 'note'),
           ),
         ],
       ],
@@ -231,32 +308,32 @@ class _NoteContent extends StatelessWidget {
 }
 
 class _PromptContent extends StatelessWidget {
-  final ItemEntity item;
+  final ItemBlock block;
   final Function(String, String) onCopy;
-  const _PromptContent({required this.item, required this.onCopy});
+  const _PromptContent({required this.block, required this.onCopy});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (item.promptContent != null) ...[
-          _ContentCard(
-            child: Text(item.promptContent!, style: AppTextStyles.bodyLarge.copyWith(height: 1.7)),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              icon: const Icon(Icons.copy_rounded, size: 16),
-              label: const Text('انسخ البرومبت'),
-              onPressed: () => onCopy(item.promptContent!, 'prompt'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.promptColor,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-              ),
-            ),
-          ),
+        if (block.promptContent != null && block.promptContent!.isNotEmpty) ...[
+           _ContentCard(
+             child: Text(block.promptContent!, style: AppTextStyles.bodyLarge.copyWith(height: 1.7)),
+           ),
+           const SizedBox(height: 16),
+           SizedBox(
+             width: double.infinity,
+             child: ElevatedButton.icon(
+               icon: const Icon(Icons.copy_rounded, size: 16),
+               label: const Text('انسخ البرومبت'),
+               onPressed: () => onCopy(block.promptContent!, 'prompt'),
+               style: ElevatedButton.styleFrom(
+                 backgroundColor: AppColors.promptColor,
+                 padding: const EdgeInsets.symmetric(vertical: 14),
+               ),
+             ),
+           ),
         ],
       ],
     );
@@ -264,10 +341,10 @@ class _PromptContent extends StatelessWidget {
 }
 
 class _LinkContent extends StatelessWidget {
-  final ItemEntity item;
+  final ItemBlock block;
   final Function(String, String) onCopy;
   final Function(String) onOpen;
-  const _LinkContent({required this.item, required this.onCopy, required this.onOpen});
+  const _LinkContent({required this.block, required this.onCopy, required this.onOpen});
 
   @override
   Widget build(BuildContext context) {
@@ -281,56 +358,58 @@ class _LinkContent extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  item.url ?? '',
+                  block.url ?? '',
                   style: AppTextStyles.bodyMedium.copyWith(color: AppColors.linkColor),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                icon: const Icon(Icons.copy_rounded, size: 16),
-                label: const Text('انسخ اللينك'),
-                onPressed: () => onCopy(item.url ?? '', 'link'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.text,
-                  side: const BorderSide(color: AppColors.border),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.open_in_new_rounded, size: 16),
-                label: const Text('افتح الموقع'),
-                onPressed: () => onOpen(item.url ?? ''),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.linkColor,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-              ),
-            ),
-          ],
-        ),
+        if (block.url != null && block.url!.isNotEmpty) ...[
+           const SizedBox(height: 12),
+           Row(
+             children: [
+               Expanded(
+                 child: OutlinedButton.icon(
+                   icon: const Icon(Icons.copy_rounded, size: 16),
+                   label: const Text('انسخ اللينك'),
+                   onPressed: () => onCopy(block.url ?? '', 'link'),
+                   style: OutlinedButton.styleFrom(
+                     foregroundColor: AppColors.text,
+                     side: const BorderSide(color: AppColors.border),
+                     padding: const EdgeInsets.symmetric(vertical: 12),
+                   ),
+                 ),
+               ),
+               const SizedBox(width: 10),
+               Expanded(
+                 child: ElevatedButton.icon(
+                   icon: const Icon(Icons.open_in_new_rounded, size: 16),
+                   label: const Text('افتح الموقع'),
+                   onPressed: () => onOpen(block.url ?? ''),
+                   style: ElevatedButton.styleFrom(
+                     backgroundColor: AppColors.linkColor,
+                     padding: const EdgeInsets.symmetric(vertical: 12),
+                   ),
+                 ),
+               ),
+             ],
+           ),
+        ],
       ],
     );
   }
 }
 
 class _AccountContent extends StatelessWidget {
-  final ItemEntity item;
+  final ItemBlock block;
   final bool showPassword;
   final VoidCallback onTogglePassword;
   final Function(String, String) onCopy;
   final Function(String) onOpen;
 
   const _AccountContent({
-    required this.item,
+    required this.block,
     required this.showPassword,
     required this.onTogglePassword,
     required this.onCopy,
@@ -342,21 +421,21 @@ class _AccountContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (item.website != null && item.website!.isNotEmpty)
-          _InfoRow(label: 'الموقع', value: item.website!),
-        if (item.email != null && item.email!.isNotEmpty)
+        if (block.website != null && block.website!.isNotEmpty)
+          _InfoRow(label: 'الموقع', value: block.website!),
+        if (block.email != null && block.email!.isNotEmpty)
           _InfoRow(
             label: 'الإيميل',
-            value: item.email!,
-            onCopy: () => onCopy(item.email!, 'email'),
+            value: block.email!,
+            onCopy: () => onCopy(block.email!, 'email'),
           ),
-        if (item.username != null && item.username!.isNotEmpty)
+        if (block.username != null && block.username!.isNotEmpty)
           _InfoRow(
             label: 'اليوزرنيم',
-            value: item.username!,
-            onCopy: () => onCopy(item.username!, 'username'),
+            value: block.username!,
+            onCopy: () => onCopy(block.username!, 'username'),
           ),
-        if (item.encryptedPassword != null && item.encryptedPassword!.isNotEmpty) ...[
+        if (block.encryptedPassword != null && block.encryptedPassword!.isNotEmpty) ...[
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(16),
@@ -375,8 +454,8 @@ class _AccountContent extends StatelessWidget {
                     Expanded(
                       child: Text(
                         showPassword
-                            ? item.encryptedPassword!
-                            : ItemUtils.maskPassword(item.encryptedPassword!),
+                            ? block.encryptedPassword!
+                            : ItemUtils.maskPassword(block.encryptedPassword!),
                         style: showPassword
                             ? AppTextStyles.mono
                             : AppTextStyles.bodyLarge.copyWith(letterSpacing: 2),
@@ -389,7 +468,7 @@ class _AccountContent extends StatelessWidget {
                     ),
                     IconButton(
                       icon: const Icon(Icons.copy_rounded, color: AppColors.textSecondary, size: 20),
-                      onPressed: () => onCopy(item.encryptedPassword!, 'password'),
+                      onPressed: () => onCopy(block.encryptedPassword!, 'password'),
                     ),
                   ],
                 ),
@@ -397,14 +476,14 @@ class _AccountContent extends StatelessWidget {
             ),
           ),
         ],
-        if (item.website != null && item.website!.isNotEmpty) ...[
+        if (block.website != null && block.website!.isNotEmpty) ...[
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
               icon: const Icon(Icons.open_in_new_rounded, size: 16),
               label: const Text('افتح الموقع'),
-              onPressed: () => onOpen(item.website ?? ''),
+              onPressed: () => onOpen(block.website ?? ''),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.accountColor,
                 padding: const EdgeInsets.symmetric(vertical: 12),
@@ -418,16 +497,16 @@ class _AccountContent extends StatelessWidget {
 }
 
 class _SnippetContent extends StatelessWidget {
-  final ItemEntity item;
+  final ItemBlock block;
   final Function(String, String) onCopy;
-  const _SnippetContent({required this.item, required this.onCopy});
+  const _SnippetContent({required this.block, required this.onCopy});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (item.codeLanguage != null)
+        if (block.codeLanguage != null)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
@@ -435,7 +514,7 @@ class _SnippetContent extends StatelessWidget {
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: AppColors.snippetColor.withValues(alpha: 0.3)),
             ),
-            child: Text(item.codeLanguage!, style: AppTextStyles.labelSmall.copyWith(color: AppColors.snippetColor)),
+            child: Text(block.codeLanguage!, style: AppTextStyles.labelSmall.copyWith(color: AppColors.snippetColor)),
           ),
         const SizedBox(height: 12),
         Container(
@@ -449,7 +528,7 @@ class _SnippetContent extends StatelessWidget {
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Text(
-              item.code ?? '',
+              block.code ?? '',
               style: const TextStyle(
                 fontFamily: 'monospace',
                 fontSize: 13,
@@ -465,7 +544,7 @@ class _SnippetContent extends StatelessWidget {
           child: ElevatedButton.icon(
             icon: const Icon(Icons.copy_rounded, size: 16),
             label: const Text('انسخ الكود'),
-            onPressed: () => onCopy(item.code ?? '', 'code'),
+            onPressed: () => onCopy(block.code ?? '', 'code'),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.snippetColor,
               foregroundColor: AppColors.background,
@@ -479,16 +558,15 @@ class _SnippetContent extends StatelessWidget {
 }
 
 class _ApiContent extends StatelessWidget {
-  final ItemEntity item;
+  final ItemBlock block;
   final Function(String, String) onCopy;
-  const _ApiContent({required this.item, required this.onCopy});
+  const _ApiContent({required this.block, required this.onCopy});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Method + Endpoint
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -504,13 +582,13 @@ class _ApiContent extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: ItemUtils.getMethodColor(item.method ?? 'GET').withValues(alpha: 0.15),
+                      color: ItemUtils.getMethodColor(block.method ?? 'GET').withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      item.method ?? 'GET',
+                      block.method ?? 'GET',
                       style: AppTextStyles.labelLarge.copyWith(
-                        color: ItemUtils.getMethodColor(item.method ?? 'GET'),
+                        color: ItemUtils.getMethodColor(block.method ?? 'GET'),
                         fontFamily: 'monospace',
                       ),
                     ),
@@ -518,7 +596,7 @@ class _ApiContent extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      item.endpoint ?? '',
+                      block.endpoint ?? '',
                       style: AppTextStyles.mono,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -529,14 +607,13 @@ class _ApiContent extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        // Actions
         Row(
           children: [
             Expanded(
               child: OutlinedButton.icon(
                 icon: const Icon(Icons.copy_rounded, size: 16),
                 label: const Text('انسخ الـ URL'),
-                onPressed: () => onCopy(item.endpoint ?? '', 'endpoint'),
+                onPressed: () => onCopy(block.endpoint ?? '', 'endpoint'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.text,
                   side: const BorderSide(color: AppColors.border),
@@ -544,13 +621,13 @@ class _ApiContent extends StatelessWidget {
                 ),
               ),
             ),
-            if (item.bodyJson != null && item.bodyJson!.isNotEmpty) ...[
+            if (block.bodyJson != null && block.bodyJson!.isNotEmpty) ...[
               const SizedBox(width: 10),
               Expanded(
                 child: OutlinedButton.icon(
                   icon: const Icon(Icons.data_object_rounded, size: 16),
                   label: const Text('انسخ JSON'),
-                  onPressed: () => onCopy(item.bodyJson ?? '', 'json'),
+                  onPressed: () => onCopy(block.bodyJson ?? '', 'json'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.text,
                     side: const BorderSide(color: AppColors.border),
@@ -561,7 +638,7 @@ class _ApiContent extends StatelessWidget {
             ],
           ],
         ),
-        if (item.headersJson != null && item.headersJson!.isNotEmpty) ...[
+        if (block.headersJson != null && block.headersJson!.isNotEmpty) ...[
           const SizedBox(height: 16),
           Text('الـ Headers', style: AppTextStyles.labelLarge),
           const SizedBox(height: 8),
@@ -573,10 +650,10 @@ class _ApiContent extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: AppColors.border),
             ),
-            child: Text(item.headersJson!, style: AppTextStyles.mono.copyWith(fontSize: 12)),
+            child: Text(block.headersJson!, style: AppTextStyles.mono.copyWith(fontSize: 12)),
           ),
         ],
-        if (item.bodyJson != null && item.bodyJson!.isNotEmpty) ...[
+        if (block.bodyJson != null && block.bodyJson!.isNotEmpty) ...[
           const SizedBox(height: 16),
           Text('الـ Body', style: AppTextStyles.labelLarge),
           const SizedBox(height: 8),
@@ -588,21 +665,19 @@ class _ApiContent extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: AppColors.border),
             ),
-            child: Text(item.bodyJson!, style: AppTextStyles.mono.copyWith(fontSize: 12)),
+            child: Text(block.bodyJson!, style: AppTextStyles.mono.copyWith(fontSize: 12)),
           ),
         ],
-        if (item.apiNotes != null && item.apiNotes!.isNotEmpty) ...[
+        if (block.apiNotes != null && block.apiNotes!.isNotEmpty) ...[
           const SizedBox(height: 16),
           Text('ملاحظات', style: AppTextStyles.labelLarge),
           const SizedBox(height: 8),
-          _ContentCard(child: Text(item.apiNotes!, style: AppTextStyles.bodyMedium)),
+          _ContentCard(child: Text(block.apiNotes!, style: AppTextStyles.bodyMedium)),
         ],
       ],
     );
   }
 }
-
-// ---- Shared sub-widgets ----
 
 class _ContentCard extends StatelessWidget {
   final Widget child;

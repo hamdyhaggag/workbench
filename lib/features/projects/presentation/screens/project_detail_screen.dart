@@ -67,7 +67,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> {
                           ),
                           const SizedBox(width: 8),
                           ElevatedButton.icon(
-                            onPressed: () => context.go('/add', extra: {
+                            onPressed: () => context.push('/add', extra: {
                               'type': ItemType.note,
                               'projectId': widget.projectId,
                             }),

@@ -43,7 +43,7 @@ class HomeScreen extends ConsumerWidget {
                   if (isMobile) ...[
                     Center(
                       child: Image.asset(
-                        'assets/images/logo.jpg',
+                        'assets/images/logo.png',
                         height: 52,
                         fit: BoxFit.contain,
                       ),

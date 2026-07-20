@@ -134,7 +134,7 @@ class _DesktopLayout extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                 color: const Color(0xFF090A0C), // Exact match of logo background
                 child: Image.asset(
-                  'assets/images/logo.jpg',
+                  'assets/images/logo.png',
                   height: 100,
                   fit: BoxFit.contain,
                 ),
