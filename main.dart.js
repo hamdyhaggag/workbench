@@ -111766,7 +111766,7 @@ k=A.b([new A.wJ(B.nr,"\u0627\u0644\u0623\u0631\u0634\u064a\u0641",B.to,d,new A.a
 j=A.a8("\u0627\u062e\u062a\u0635\u0627\u0631\u0627\u062a \u0627\u0644\u0643\u064a\u0628\u0648\u0631\u062f",d,d,d,B.b1.aU(B.x),d,d)
 i=A.b([new A.O1("\u0627\u0644\u0628\u062d\u062b \u0627\u0644\u0633\u0631\u064a\u0639","Ctrl + K",d),new A.O1("\u0625\u063a\u0644\u0627\u0642","Esc",d)],l)
 h=A.a8("\u0639\u0646 \u0627\u0644\u062a\u0637\u0628\u064a\u0642",d,d,d,B.b1.aU(B.x),d,d)
-g=A.b([new A.wJ(B.RG,"Workbench",A.a8("v1.0.0",d,d,d,B.bb,d,d),d,d,d),new A.wJ(B.Rh,"\u0628\u064a\u0627\u0646\u0627\u062a\u0643 \u0645\u062d\u0645\u064a\u0629 \u0639\u0644\u0649 Firebase",d,B.d1,d,d)],l)
+g=A.b([new A.wJ(B.RG,"WorkSpace",A.a8("v1.0.0",d,d,d,B.bb,d,d),d,d,d),new A.wJ(B.Rh,"\u0628\u064a\u0627\u0646\u0627\u062a\u0643 \u0645\u062d\u0645\u064a\u0629 \u0639\u0644\u0649 Firebase",d,B.d1,d,d)],l)
 f=A.a8("\u062a\u0633\u062c\u064a\u0644 \u062e\u0631\u0648\u062c",d,d,d,B.b1.aU(B.b5),d,d)
 e=B.b5.cY(0.4)
 return A.jN(d,B.aa,A.pJ(A.b([new A.ck(new A.aM(B.d3,A.bU(A.b([c,B.ie,p,B.ie,o,B.aU,n,B.ie,m,B.aU,new A.C1(k,d),B.fD,j,B.aU,new A.C1(i,d),B.fD,h,B.aU,new A.C1(g,d),B.ie,A.ex(A.Zm(B.RY,f,new A.aCT(this,a,a0),A.Zn(d,d,d,d,d,d,d,d,d,d,d,d,B.j4,d,new A.cv(A.be(12),B.v),new A.bf(e,1,B.C,-1),d,d,d,d)),d,1/0)],l),B.a2,B.l,B.n),d),d),B.ig],l)),d,d)},
@@ -111842,7 +111842,7 @@ l=B.I.cY(0.2)
 l=A.b2i(i,B.aa,i,i,i,i,i,i,i,i,i,A.e4(i,i,B.x,i,i,i,i,i,A.je().$0().d,i,i,12,i,i,i,i,i,!0,i,i,i,i,i,i,i,i),B.hr,i,i,i,l,i,i,i,i,B.aF,i)
 k=A.e4(i,i,B.I,i,i,i,i,i,A.je().$0().d,i,i,12,i,i,B.br,i,i,!0,i,i,i,i,i,i,i,i)
 j=A.e4(i,i,B.x,i,i,i,i,i,A.je().$0().d,i,i,12,i,i,i,i,i,!0,i,i,i,i,i,i,i,i)
-return new A.yU(h,"Workbench",A.At(f,new A.xi(B.O,0,i,i,B.I,B.x,A.e4(i,i,i,i,i,i,i,i,A.je().$0().d,i,i,11,i,i,B.br,i,i,!0,i,i,i,i,i,i,i,i),A.e4(i,i,i,i,i,i,i,i,A.je().$0().d,i,i,11,i,i,i,i,i,!0,i,i,i,i,i,i,i,i),i,i,i,i,i,i),B.aG,new A.xm(i,B.O,i,i,0,B.an,new A.cv(e,B.aF)),l,B.O3,new A.pL(B.O,0,i,i,new A.cv(o,B.aF),i,n,m,i,i,i,i,i,i),B.PD,B.PI,new A.y3(c),B.QO,g,new A.ld(s),b,new A.z4(B.O,i,j,k,B.RK,B.RI,i,i,i,B.OU,i,i,i),new A.vg(B.O,new A.cv(r,B.aF),i,8,B.ab,i,q,i,i,i,i,i,i),B.aa,new A.zS(i,new A.bk(4,t.YI),i,i,B.dH,new A.bk(B.a9,t.rc),i,i,i,i,i),p,new A.Al(d),!0),B.Kf,B.zz,B.a13,B.a_C,!1,i)}}
+return new A.yU(h,"WorkSpace",A.At(f,new A.xi(B.O,0,i,i,B.I,B.x,A.e4(i,i,i,i,i,i,i,i,A.je().$0().d,i,i,11,i,i,B.br,i,i,!0,i,i,i,i,i,i,i,i),A.e4(i,i,i,i,i,i,i,i,A.je().$0().d,i,i,11,i,i,i,i,i,!0,i,i,i,i,i,i,i,i),i,i,i,i,i,i),B.aG,new A.xm(i,B.O,i,i,0,B.an,new A.cv(e,B.aF)),l,B.O3,new A.pL(B.O,0,i,i,new A.cv(o,B.aF),i,n,m,i,i,i,i,i,i),B.PD,B.PI,new A.y3(c),B.QO,g,new A.ld(s),b,new A.z4(B.O,i,j,k,B.RK,B.RI,i,i,i,B.OU,i,i,i),new A.vg(B.O,new A.cv(r,B.aF),i,8,B.ab,i,q,i,i,i,i,i,i),B.aa,new A.zS(i,new A.bk(4,t.YI),i,i,B.dH,new A.bk(B.a9,t.rc),i,i,i,i,i),p,new A.Al(d),!0),B.Kf,B.zz,B.a13,B.a_C,!1,i)}}
 A.aWm.prototype={
 $0(){return A.aWk()},
 $S:0}
