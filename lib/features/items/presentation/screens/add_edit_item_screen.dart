@@ -35,7 +35,7 @@ class _AddEditItemScreenState extends ConsumerState<AddEditItemScreen> {
   final _titleCtrl = TextEditingController();
   final _tagsCtrl = TextEditingController();
 
-  List<BlockState> _blocks = [];
+  final List<BlockState> _blocks = [];
 
   @override
   void initState() {
