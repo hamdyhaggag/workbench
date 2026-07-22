@@ -66,20 +66,25 @@ class _ShellScaffoldState extends ConsumerState<ShellScaffold> {
       }
     }
 
+    final fabWidget = showFab ? QuickAddFab(defaultProjectId: defaultProjectId) : null;
+
     return KeyboardListener(
       focusNode: FocusNode(),
       onKeyEvent: (e) {},
       child: Stack(
         children: [
-          Scaffold(
-            backgroundColor: AppColors.background,
-            body: isDesktop
-                ? _DesktopLayout(child: widget.child)
-                : isTablet
-                    ? _TabletLayout(child: widget.child)
-                    : _MobileLayout(child: widget.child),
-            floatingActionButton: showFab ? QuickAddFab(defaultProjectId: defaultProjectId) : null,
-          ),
+          isDesktop || isTablet
+              ? Scaffold(
+                  backgroundColor: AppColors.background,
+                  body: isDesktop
+                      ? _DesktopLayout(child: widget.child)
+                      : _TabletLayout(child: widget.child),
+                  floatingActionButton: fabWidget,
+                )
+              : _MobileLayout(
+                  fab: fabWidget,
+                  child: widget.child,
+                ),
           if (_showCommandPalette)
             CommandPalette(
               onClose: () => setState(() => _showCommandPalette = false),
@@ -276,7 +281,8 @@ class _TabletLayout extends ConsumerWidget {
 
 class _MobileLayout extends ConsumerWidget {
   final Widget child;
-  const _MobileLayout({required this.child});
+  final Widget? fab;
+  const _MobileLayout({required this.child, this.fab});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -285,6 +291,7 @@ class _MobileLayout extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: child,
+      floatingActionButton: fab,
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: AppColors.card,

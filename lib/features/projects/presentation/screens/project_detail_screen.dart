@@ -8,7 +8,6 @@ import 'package:workbench/features/items/domain/entities/item_entity.dart';
 import '../providers/project_providers.dart';
 import 'package:workbench/features/items/presentation/providers/item_providers.dart';
 import 'package:workbench/features/items/presentation/widgets/item_card.dart';
-import 'package:workbench/core/widgets/quick_add_fab.dart';
 
 class ProjectDetailScreen extends ConsumerStatefulWidget {
   final String projectId;
@@ -154,7 +153,6 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> {
           );
         },
       ),
-      floatingActionButton: QuickAddFab(defaultProjectId: widget.projectId),
     );
   }
 }
